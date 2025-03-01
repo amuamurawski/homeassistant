@@ -1,8 +1,7 @@
 blueprint:
-  name: Confirmable Notification
+  name: Potwierdzalne powiadomienie
   description:
-    A script that sends an actionable notification with a confirmation
-    before running the specified action.
+    Skrypt wysyłający interaktywne powiadomienie z potwierdzeniem przed wykonaniem określonej akcji
   domain: script
   source_url: https://github.com/amuamurawski/homeassistant/blob/main/confirmable_notification.yaml
   author: Home Assistant
@@ -10,45 +9,44 @@ blueprint:
     notify_device:
       name: Device to notify
       description:
-        Device needs to run the official Home Assistant app to receive
-        notifications.
+        Urządzenie musi mieć zainstalowaną oficjalną aplikację Home Assistant, aby otrzymywać powiadomienia.
       selector:
         device:
           filter:
             - integration: mobile_app
           multiple: false
     title:
-      name: Title
-      description: The title of the button shown in the notification.
+      name: Tytuł
+      description: Tytuł przycisku wyświetlanego w powiadomieniu.
       default: ""
       selector:
         text: {}
     message:
-      name: Message
-      description: The message body
+      name: Wiadomość
+      description: Wiadomość
       selector:
         text: {}
     confirm_text:
-      name: Confirmation Text
-      description: Text to show on the confirmation button
+      name: Tekst potwierdzenia
+      description: Tekst wyświetlany na przycisku potwierdzenia.
       default: Confirm
       selector:
         text: {}
     confirm_action:
-      name: Confirmation Action
-      description: Action to run when notification is confirmed
+      name: Akcja potwierdzenia
+      description: Akcja do wykonania po potwierdzeniu powiadomienia.
       default: []
       selector:
         action: {}
     dismiss_text:
-      name: Dismiss Text
-      description: Text to show on the dismiss button
+      name: Tekst odrzucenia
+      description: Tekst wyświetlany na przycisku odrzucenia
       default: Dismiss
       selector:
         text: {}
     dismiss_action:
-      name: Dismiss Action
-      description: Action to run when notification is dismissed
+      name: Akcja odrzucenia
+      description: Akcja do wykonania po odrzuceniu powiadomienia.
       default: []
       selector:
         action: {}
