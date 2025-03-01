@@ -68,7 +68,7 @@ sequence:
       action_dismiss: "{{ 'DISMISS_' ~ context.id }}"
 
   - alias: Send notification
-    service: notify.notify
+    action: notify.notify
     data:
       title: !input title
       message: !input message
