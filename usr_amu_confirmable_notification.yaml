@@ -1,13 +1,13 @@
 blueprint:
   name: Potwierdzalne powiadomienie
   description:
-    Skrypt wysyłający interaktywne powiadomienie z potwierdzeniem przed wykonaniem określonej akcji. Skrypt wysyla do wszystkich urzadzeń ekosystemu.
+    Skrypt wysyłający interaktywne powiadomienie z potwierdzeniem przed wykonaniem określonej akcji. Skrypt wysyła do wszystkich urządzeń ekosystemu.
   domain: script
   source_url: https://github.com/amuamurawski/homeassistant/blob/main/usr_amu_confirmable_notification.yaml
   author: Home Assistant
   input:
     notify_device:
-      name: Device to notify
+      name: Urządzenie do powiadomienia
       description:
         Urządzenie musi mieć zainstalowaną oficjalną aplikację Home Assistant, aby otrzymywać powiadomienia.
       selector:
@@ -23,13 +23,13 @@ blueprint:
         text: {}
     message:
       name: Wiadomość
-      description: Wiadomość
+      description: Treść powiadomienia.
       selector:
         text: {}
     confirm_text:
       name: Tekst potwierdzenia
       description: Tekst wyświetlany na przycisku potwierdzenia.
-      default: Confirm
+      default: "Confirm"
       selector:
         text: {}
     confirm_action:
@@ -40,8 +40,8 @@ blueprint:
         action: {}
     dismiss_text:
       name: Tekst odrzucenia
-      description: Tekst wyświetlany na przycisku odrzucenia
-      default: Dismiss
+      description: Tekst wyświetlany na przycisku odrzucenia.
+      default: "Dismiss"
       selector:
         text: {}
     dismiss_action:
@@ -50,14 +50,25 @@ blueprint:
       default: []
       selector:
         action: {}
+    timeout_seconds:
+      name: Limit czasu na odpowiedź
+      description: Czas (w sekundach), po którym skrypt zakończy działanie, jeśli użytkownik nie odpowie.
+      default: 60
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: s
+          mode: slider
 mode: restart
 sequence:
   - alias: Set up variables
     variables:
       action_confirm: "{{ 'CONFIRM_' ~ context.id }}"
       action_dismiss: "{{ 'DISMISS_' ~ context.id }}"
+
   - alias: Send notification
-    action: notify.notify
+    service: notify.notify
     data:
       title: !input title
       message: !input message
@@ -67,6 +78,7 @@ sequence:
             title: !input confirm_text
           - action: "{{ action_dismiss }}"
             title: !input dismiss_text
+
   - alias: Awaiting response
     wait_for_trigger:
       - platform: event
@@ -77,8 +89,10 @@ sequence:
         event_type: mobile_app_notification_action
         event_data:
           action: "{{ action_dismiss }}"
+    timeout: !input timeout_seconds
+
   - choose:
-      - conditions: "{{ wait.trigger.event.data.action == action_confirm }}"
+      - conditions: "{{ wait.trigger is not none and wait.trigger.event.data.action == action_confirm }}"
         sequence: !input confirm_action
-      - conditions: "{{ wait.trigger.event.data.action == action_dismiss }}"
+      - conditions: "{{ wait.trigger is not none and wait.trigger.event.data.action == action_dismiss }}"
         sequence: !input dismiss_action
