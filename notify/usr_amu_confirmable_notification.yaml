@@ -1,98 +1,266 @@
 blueprint:
-  name: Potwierdzalne powiadomienie
+  name: Otwarte okno wyłącza urządzenie typu climate (klimatyzację/ogrzewanie)
   description:
-    Skrypt wysyłający interaktywne powiadomienie z potwierdzeniem przed wykonaniem określonej akcji. Skrypt wysyła do wszystkich urządzeń ekosystemu.
-  domain: script
-  source_url: https://github.com/amuamurawski/homeassistant/blob/main/notify/usr_amu_confirmable_notification.yaml
-  author: Artur M
+    "Urządzenia typu climate, takie jak systemy grzewcze i chłodzące (jeśli
+    są aktywne), zostają wyłączone i wracają do poprzedniego stanu po ponownym zamknięciu
+    okna lub drzwi. Można również zdefiniować opóźnienie, zanim urządzenie typu climate
+    powróci do poprzedniego stanu. Obecnie obsługiwane jest kilka trybów grzania oraz
+    różnych producentów, takich jak Tado. Obsługiwane tryby HVAC to: automatic, auto,
+    heat, heat_cool i off."
+  domain: automation
+  source_url: https://github.com/amuamurawski/homeassistant/blob/main/open_window_climate_off/open_window_climet_off.yaml
   input:
-    notify_device:
-      name: Urządzenie do powiadomienia
+    window_entity:
+      name: Sensor otwarcia okna/dwrzwi
       description:
-        Urządzenie musi mieć zainstalowaną oficjalną aplikację Home Assistant, aby otrzymywać powiadomienia.
+        Czujnik okna, który steruje urządzeniem klimatyzacyjnym. Jeśli
+        masz więcej czujników okiennych, utwórz sensor grupowy.
       selector:
-        device:
+        entity:
           filter:
-            - integration: mobile_app
+            domain:
+              - binary_sensor
+            device_class:
+              - window
+              - door
           multiple: false
-    title:
-      name: Tytuł
-      description: Tytuł przycisku wyświetlanego w powiadomieniu.
-      default: ""
-      selector:
-        text: {}
-    message:
-      name: Wiadomość
-      description: Treść powiadomienia.
-      selector:
-        text: {}
-    confirm_text:
-      name: Tekst potwierdzenia
-      description: Tekst wyświetlany na przycisku potwierdzenia.
-      default: "Confirm"
-      selector:
-        text: {}
-    confirm_action:
-      name: Akcja potwierdzenia
-      description: Akcja do wykonania po potwierdzeniu powiadomienia.
-      default: []
-      selector:
-        action: {}
-    dismiss_text:
-      name: Tekst odrzucenia
-      description: Tekst wyświetlany na przycisku odrzucenia.
-      default: "Dismiss"
-      selector:
-        text: {}
-    dismiss_action:
-      name: Akcja odrzucenia
-      description: Akcja do wykonania po odrzuceniu powiadomienia.
-      default: []
-      selector:
-        action: {}
-    timeout_seconds:
-      name: Limit czasu na odpowiedź
-      description: Czas (w sekundach), po którym skrypt zakończy działanie, jeśli użytkownik nie odpowie.
-      default: 60
+    minimum_open_time:
+      name: Minimalny czas otwarcia
+      description: Czas w sekundach, jaki należy odczekać przed uruchomieniem automatyzacji.
+      default: 12
       selector:
         number:
-          min: 5
-          max: 600
-          unit_of_measurement: s
+          min: 0.0
+          max: 120.0
+          unit_of_measurement: seconds
           mode: slider
-mode: restart
-sequence:
-  - alias: Set up variables
-    variables:
-      action_confirm: "{{ 'CONFIRM_' ~ context.id }}"
-      action_dismiss: "{{ 'DISMISS_' ~ context.id }}"
-
-  - alias: Send notification
-    action: notify.notify
-    data:
-      title: !input title
-      message: !input message
-      data:
-        actions:
-          - action: "{{ action_confirm }}"
-            title: !input confirm_text
-          - action: "{{ action_dismiss }}"
-            title: !input dismiss_text
-
-  - alias: Awaiting response
-    wait_for_trigger:
-      - platform: event
-        event_type: mobile_app_notification_action
-        event_data:
-          action: "{{ action_confirm }}"
-      - platform: event
-        event_type: mobile_app_notification_action
-        event_data:
-          action: "{{ action_dismiss }}"
-    timeout: !input timeout_seconds
-
+          step: 1.0
+    minimum_close_time:
+      name: Minimalny czas zamknięcia
+      description:
+        Czas w sekundach, jaki należy odczekać przed ponownym włączeniem
+        urządzenia climate.
+      default: 12
+      selector:
+        number:
+          min: 0.0
+          max: 300.0
+          unit_of_measurement: seconds
+          mode: slider
+          step: 1.0
+    climate_target:
+      name: Urządzenie climate
+      description: Urządzenie climate sterowane przez czujnik okna.
+      selector:
+        entity:
+          filter:
+            domain: climate
+          multiple: false
+    open_action:
+      name: Dodatkowa akcja otwarcia (opcjonalnie)
+      description:
+        Akcja do wykonania po otwarciu czujnika drzwi/okna (np. otwarcie
+        rolety, komunikat głosowy TTS).
+      default: []
+      selector:
+        action: {}
+    close_action:
+      name: Dodatkowa akcja przy zamknięciu (opcjonalnie)
+      description:
+        Akcja do wykonania po ponownym zamknięciu czujnika drzwi/okna (np.
+        zamknięcie rolety, komunikat głosowy TTS).
+      default: []
+      selector:
+        action: {}
+variables:
+  open_action: !input open_action
+  close_action: !input close_action
+mode: single
+triggers:
+  - trigger: state
+    entity_id: !input window_entity
+    to: "on"
+    for: !input minimum_open_time
+condition:
+  - condition: not
+    conditions:
+      - condition: state
+        entity_id: !input climate_target
+        state: "off"
+action:
   - choose:
-      - conditions: "{{ wait.trigger is not none and wait.trigger.event.data.action == action_confirm }}"
-        sequence: !input confirm_action
-      - conditions: "{{ wait.trigger is not none and wait.trigger.event.data.action == action_dismiss }}"
-        sequence: !input dismiss_action
+      - conditions:
+          - condition: state
+            entity_id: !input climate_target
+            state: cool
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: !input climate_target
+          - choose:
+              - conditions: "{{ open_action is defined and open_action|length > 0 }}"
+                sequence: !input open_action
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: !input window_entity
+                to: "off"
+            continue_on_timeout: false
+          - delay: !input minimum_close_time
+          - choose:
+              - conditions: "{{ close_action is defined and close_action|length > 0 }}"
+                sequence: !input close_action
+          - action: climate.set_hvac_mode
+            target:
+              entity_id: !input climate_target
+            data:
+              hvac_mode: cool
+      - conditions:
+          - condition: state
+            entity_id: !input climate_target
+            state: heat_cool
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: !input climate_target
+          - choose:
+              - conditions: "{{ open_action is defined and open_action|length > 0 }}"
+                sequence: !input open_action
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: !input window_entity
+                to: "off"
+            continue_on_timeout: false
+          - delay: !input minimum_close_time
+          - choose:
+              - conditions: "{{ close_action is defined and close_action|length > 0 }}"
+                sequence: !input close_action
+          - action: climate.set_hvac_mode
+            target:
+              entity_id: !input climate_target
+            data:
+              hvac_mode: heat_cool
+      - conditions:
+          - condition: state
+            entity_id: !input climate_target
+            state: heat
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: !input climate_target
+          - choose:
+              - conditions: "{{ open_action is defined and open_action|length > 0 }}"
+                sequence: !input open_action
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: !input window_entity
+                to: "off"
+            continue_on_timeout: false
+          - delay: !input minimum_close_time
+          - choose:
+              - conditions: "{{ close_action is defined and close_action|length > 0 }}"
+                sequence: !input close_action
+          - action: climate.set_hvac_mode
+            data:
+              hvac_mode: heat
+            target:
+              entity_id: !input climate_target
+      - conditions:
+          - condition: state
+            entity_id: !input climate_target
+            state: automatic
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: !input climate_target
+          - choose:
+              - conditions: "{{ open_action is defined and open_action|length > 0 }}"
+                sequence: !input open_action
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: !input window_entity
+                to: "off"
+            continue_on_timeout: false
+          - delay: !input minimum_close_time
+          - choose:
+              - conditions: "{{ close_action is defined and close_action|length > 0 }}"
+                sequence: !input close_action
+          - action: climate.set_hvac_mode
+            data:
+              hvac_mode: automatic
+            target:
+              entity_id: !input climate_target
+      - conditions:
+          - condition: state
+            entity_id: !input climate_target
+            state: auto
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: !input climate_target
+          - choose:
+              - conditions: "{{ open_action is defined and open_action|length > 0 }}"
+                sequence: !input open_action
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: !input window_entity
+                to: "off"
+            continue_on_timeout: false
+          - delay: !input minimum_close_time
+          - choose:
+              - conditions: "{{ close_action is defined and close_action|length > 0 }}"
+                sequence: !input close_action
+          - action: climate.set_hvac_mode
+            data:
+              hvac_mode: auto
+            target:
+              entity_id: !input climate_target
+      - conditions:
+          - condition: state
+            entity_id: !input climate_target
+            state: dry
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: !input climate_target
+          - choose:
+              - conditions: "{{ open_action is defined and open_action|length > 0 }}"
+                sequence: !input open_action
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: !input window_entity
+                to: "off"
+            continue_on_timeout: false
+          - delay: !input minimum_close_time
+          - choose:
+              - conditions: "{{ close_action is defined and close_action|length > 0 }}"
+                sequence: !input close_action
+          - action: climate.set_hvac_mode
+            data:
+              hvac_mode: dry
+            target:
+              entity_id: !input climate_target
+      - conditions:
+          - condition: state
+            entity_id: !input climate_target
+            state: fan_only
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: !input climate_target
+          - choose:
+              - conditions: "{{ open_action is defined and open_action|length > 0 }}"
+                sequence: !input open_action
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: !input window_entity
+                to: "off"
+            continue_on_timeout: false
+          - delay: !input minimum_close_time
+          - choose:
+              - conditions: "{{ close_action is defined and close_action|length > 0 }}"
+                sequence: !input close_action
+          - action: climate.set_hvac_mode
+            data:
+              hvac_mode: fan_only
+            target:
+              entity_id: !input climate_target
