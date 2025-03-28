@@ -1,10 +1,10 @@
 blueprint:
   name: Otwarte okno wyłącza urządzenie typu climate (klimatyzację/ogrzewanie)
-  description: 'Urządzenia klimatyzacyjne, takie jak systemy grzewcze i chłodzące (jeśli są aktywne), zostają wyłączone
+  description: 'Urządzenia typu climate, takie jak systemy grzewcze i chłodzące (jeśli są aktywne), zostają wyłączone
                 i wracają do poprzedniego stanu po ponownym zamknięciu okna. Można również zdefiniować opóźnienie, zanim
-                urządzenie klimatyzacyjne powróci do poprzedniego stanu. Obecnie obsługiwane jest kilka trybów grzania oraz
+                urządzenie typu climate powróci do poprzedniego stanu. Obecnie obsługiwane jest kilka trybów grzania oraz
                 różnych producentów, takich jak Tado. Obsługiwane tryby HVAC to:
-                automatic, auto, heat, heat_cool i off. Jeśli potrzebujesz więcej, daj mi znać. Udanej automatyzacji!'
+                automatic, auto, heat, heat_cool i off.'
   domain: automation
   source_url: https://github.com/amuamurawski/homeassistant/blob/main/open_window_climate_off/open_window_climet_off.yaml
   input:
