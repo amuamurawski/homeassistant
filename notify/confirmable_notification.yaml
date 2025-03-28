@@ -1,0 +1,84 @@
+blueprint:
+  name: Potwierdzalne powiadomienie
+  description:
+    Skrypt wysyłający interaktywne powiadomienie z potwierdzeniem przed wykonaniem określonej akcji
+  domain: script
+  source_url: https://github.com/amuamurawski/homeassistant/blob/main/notify/confirmable_notification.yaml
+  author: Artur Murawski
+  input:
+    notify_device:
+      name: Device to notify
+      description:
+        Urządzenie musi mieć zainstalowaną oficjalną aplikację Home Assistant, aby otrzymywać powiadomienia.
+      selector:
+        device:
+          filter:
+            - integration: mobile_app
+          multiple: false
+    title:
+      name: Tytuł
+      description: Tytuł przycisku wyświetlanego w powiadomieniu.
+      default: ""
+      selector:
+        text: {}
+    message:
+      name: Wiadomość
+      description: Wiadomość
+      selector:
+        text: {}
+    confirm_text:
+      name: Tekst potwierdzenia
+      description: Tekst wyświetlany na przycisku potwierdzenia.
+      default: Confirm
+      selector:
+        text: {}
+    confirm_action:
+      name: Akcja potwierdzenia
+      description: Akcja do wykonania po potwierdzeniu powiadomienia.
+      default: []
+      selector:
+        action: {}
+    dismiss_text:
+      name: Tekst odrzucenia
+      description: Tekst wyświetlany na przycisku odrzucenia
+      default: Dismiss
+      selector:
+        text: {}
+    dismiss_action:
+      name: Akcja odrzucenia
+      description: Akcja do wykonania po odrzuceniu powiadomienia.
+      default: []
+      selector:
+        action: {}
+mode: restart
+sequence:
+  - alias: Set up variables
+    variables:
+      action_confirm: "{{ 'CONFIRM_' ~ context.id }}"
+      action_dismiss: "{{ 'DISMISS_' ~ context.id }}"
+  - alias: Send notification
+    action: notify.notify
+    data:
+      title: !input title
+      message: !input message
+      data:
+        actions:
+          - action: "{{ action_confirm }}"
+            title: !input confirm_text
+          - action: "{{ action_dismiss }}"
+            title: !input dismiss_text
+  - alias: Awaiting response
+    wait_for_trigger:
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_confirm }}"
+      - platform: event
+        event_type: mobile_app_notification_action
+        event_data:
+          action: "{{ action_dismiss }}"
+  - choose:
+      - conditions: "{{ wait.trigger.event.data.action == action_confirm }}"
+        sequence: !input confirm_action
+      - conditions: "{{ wait.trigger.event.data.action == action_dismiss }}"
+        sequence: !input dismiss_action
