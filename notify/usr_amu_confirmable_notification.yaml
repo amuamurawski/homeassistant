@@ -3,7 +3,7 @@ blueprint:
   description:
     Skrypt wysyłający interaktywne powiadomienie z potwierdzeniem przed wykonaniem określonej akcji. Skrypt wysyła do wszystkich urządzeń ekosystemu.
   domain: script
-  source_url: https://github.com/amuamurawski/homeassistant/blob/main/usr_amu_confirmable_notification.yaml
+  source_url: https://github.com/amuamurawski/homeassistant/blob/main/notyfi/usr_amu_confirmable_notification.yaml
   author: Home Assistant
   input:
     notify_device:
