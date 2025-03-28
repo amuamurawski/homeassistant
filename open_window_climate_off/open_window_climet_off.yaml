@@ -1,7 +1,7 @@
 blueprint:
   name: Otwarte okno wyłącza urządzenie typu climate (klimatyzację/ogrzewanie)
   description: 'Urządzenia typu climate, takie jak systemy grzewcze i chłodzące (jeśli są aktywne), zostają wyłączone
-                i wracają do poprzedniego stanu po ponownym zamknięciu okna. Można również zdefiniować opóźnienie, zanim
+                i wracają do poprzedniego stanu po ponownym zamknięciu okna lub drzwi. Można również zdefiniować opóźnienie, zanim
                 urządzenie typu climate powróci do poprzedniego stanu. Obecnie obsługiwane jest kilka trybów grzania oraz
                 różnych producentów, takich jak Tado. Obsługiwane tryby HVAC to:
                 automatic, auto, heat, heat_cool i off.'
@@ -15,7 +15,9 @@ blueprint:
       selector:
         entity:
           domain: binary_sensor
-          device_class: window
+          device_class:
+            - window
+            - door
           multiple: false
     minimum_open_time:
       name: Minimalny czas otwarcia
