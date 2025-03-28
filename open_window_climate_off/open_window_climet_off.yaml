@@ -1,5 +1,5 @@
 blueprint:
-  name: Otwarte okno wyłącza CLIMATE
+  name: Otwarte okno wyłącza urządzenie typu climate (klimatyzację/ogrzewanie)
   description: 'Urządzenia klimatyzacyjne, takie jak systemy grzewcze i chłodzące (jeśli są aktywne), zostają wyłączone
                 i wracają do poprzedniego stanu po ponownym zamknięciu okna. Można również zdefiniować opóźnienie, zanim
                 urządzenie klimatyzacyjne powróci do poprzedniego stanu. Obecnie obsługiwane jest kilka trybów grzania oraz
