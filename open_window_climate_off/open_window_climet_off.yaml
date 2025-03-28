@@ -6,6 +6,7 @@ blueprint:
                 różnych producentów, takich jak Tado. Obsługiwane tryby HVAC to:
                 automatic, auto, heat, heat_cool i off. Jeśli potrzebujesz więcej, daj mi znać. Udanej automatyzacji!'
   domain: automation
+  source_url: https://github.com/amuamurawski/homeassistant/blob/main/open_window_climate_off/open_window_climet_off.yaml
   input:
     window_entity:
       name: Sensor otwarcia okna/dwrzwi 
