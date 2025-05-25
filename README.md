@@ -1,7 +1,6 @@
 # Blueprinty do Home Assistant
 
-To repozytorium zawiera moje własne **blueprinty**, które wykorzystuję w automatyzacjach w [Home Assistant](https://www.home-assistant.io/).
-
+To repozytorium zawiera moje  **blueprinty**, które wykorzystuję w automatyzacjach w [Home Assistant](https://www.home-assistant.io/).
 Znajdziesz tu gotowe szablony automatyzacji, które możesz łatwo zaimportować i dostosować do swojej instalacji.
 
 ## 📂 Zawartość
