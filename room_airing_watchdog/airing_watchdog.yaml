@@ -33,8 +33,8 @@ blueprint:
           device_class: temperature
 
     notify_target:
-      name: Kanał powiadomień
-      description: "Przykład: notify.mobile_app_twój_telefon."
+      name: Kanały powiadomień
+      description: "Podaj jeden lub więcej serwisów notify (oddziel przecinkiem lub nową linią). Przykład: notify.mobile_app_twój_telefon."
       selector:
         text:
 
@@ -129,7 +129,12 @@ variables:
   v_window: !input window_contact
   v_room_t: !input room_temperature
   v_out_t: !input outdoor_temperature
-  v_notify: !input notify_target
+  v_notify_raw: !input notify_target
+  v_notify: >-
+    {% set raw = v_notify_raw if v_notify_raw is string else '' %}
+    {% set cleaned = raw | replace('\r', '\n') | replace(',', '\n') %}
+    {% set parts = cleaned | split('\n') %}
+    {{ parts | map('trim') | select('ne', '') | list }}
   v_open_follow: !input open_follow_up_action
   v_close_follow: !input close_follow_up_action
   v_thr: !input temp_diff_threshold
@@ -188,10 +193,17 @@ actions:
                         {{ t_room_label }}: {{ area_name(v_window) or t_unknown_room }}.
                         {{ t_temp_diff_label }}: {{ diff | round(1) }}°C.
                         {{ t_window_open_label }} {{ allowed_min | int }} {{ t_minutes_suffix }}.
-                  - service: "{{ v_notify }}"
-                    data:
-                      title: "{{ t_notify_title_initial }}"
-                      message: "{{ msg }}"
+                  - if:
+                      - condition: template
+                        value_template: "{{ v_notify | length > 0 }}"
+                    then:
+                      - repeat:
+                          for_each: "{{ v_notify }}"
+                          sequence:
+                            - service: "{{ repeat.item }}"
+                              data:
+                                title: "{{ t_notify_title_initial }}"
+                                message: "{{ msg }}"
                   - if:
                       - condition: template
                         value_template: "{{ v_open_follow | length > 0 }}"
@@ -206,10 +218,17 @@ actions:
                       sequence:
                         - delay:
                             minutes: !input repeat_reminder_minutes
-                        - service: "{{ v_notify }}"
-                          data:
-                            title: "{{ t_notify_title_repeat }}"
-                            message: "{{ msg }}"
+                        - if:
+                            - condition: template
+                              value_template: "{{ v_notify | length > 0 }}"
+                          then:
+                            - repeat:
+                                for_each: "{{ v_notify }}"
+                                sequence:
+                                  - service: "{{ repeat.item }}"
+                                    data:
+                                      title: "{{ t_notify_title_repeat }}"
+                                      message: "{{ msg }}"
               - if:
                   - condition: template
                     value_template: "{{ v_persistent }}"

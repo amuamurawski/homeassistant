@@ -16,7 +16,7 @@
 | `window_contact` | `binary_sensor` (`door`, `window`, `opening`) | – | Czujnik otwarcia okna lub drzwi. |
 | `room_temperature` | `sensor` (`temperature`) | – | Czujnik temperatury w pomieszczeniu. |
 | `outdoor_temperature` | `sensor` (`temperature`) | – | Czujnik temperatury na zewnątrz. |
-| `notify_target` | `notify` target | – | Kanał powiadomień, np. `notify.mobile_app_moj_telefon`. |
+| `notify_target` | tekst | – | Jeden lub więcej serwisów `notify` (oddziel przecinkiem lub nową linią), np. `notify.mobile_app_moj_telefon`. |
 
 ### Opcjonalne
 | Parametr | Typ | Domyślnie | Opis |
@@ -46,7 +46,7 @@
    ```
 
 4. Blueprint czeka na zamknięcie okna przez `allowed_minutes` (liczone w sekundach).
-5. Po przekroczeniu limitu wysyłane jest powiadomienie z informacją o pokoju (`area_name`), różnicy temperatur oraz czasie otwarcia.
+5. Po przekroczeniu limitu wysyłane są powiadomienia (do wszystkich zdefiniowanych kanałów) z informacją o pokoju (`area_name`), różnicy temperatur oraz czasie otwarcia.
 6. Dopóki okno pozostaje otwarte i ustawiono `repeat_reminder_minutes`, kolejne przypomnienia trafiają do wskazanego kanału.
 7. `open_follow_up_action` pozwala wykonać dodatkowe akcje razem z alarmem (np. powiadomienie głosowe, sterowanie ogrzewaniem), `close_follow_up_action` zadziała po zamknięciu okna, a `use_persistent_notification` dodaje powiadomienia w interfejsie HA.
 
