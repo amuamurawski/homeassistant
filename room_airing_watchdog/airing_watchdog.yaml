@@ -39,7 +39,9 @@ blueprint:
       selector:
         entity:
           domain: sensor
-          device_class: carbon_dioxide
+          device_class: 
+            - carbon_dioxide
+            - volatile_organic_compounds_parts
 
     notify_target:
       name: Kanał powiadomień
@@ -102,7 +104,7 @@ blueprint:
           unit_of_measurement: "min"
 
     co2_target:
-      name: Docelowe CO₂ [ppm]
+      name: Docelowe CO₂ [ppm/ppb]
       description: "Poziom CO₂, do którego system będzie próbował zejść przed wysłaniem alarmu (jeśli wskazano czujnik)."
       default: 900
       selector:
