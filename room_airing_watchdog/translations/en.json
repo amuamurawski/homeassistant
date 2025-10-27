@@ -1,0 +1,52 @@
+{
+  "title": "Room airing watchdog v1.2.1",
+  "description": "Alerts when airing takes too long with a large indoor-outdoor temperature difference and can wait for CO₂ to reach a target.",
+  "inputs": {
+    "window_contact": {
+      "name": "Window or door sensor",
+      "description": "Select the binary open/close sensor."
+    },
+    "room_temperature": {
+      "name": "Room temperature",
+      "description": "Indoor temperature sensor."
+    },
+    "outdoor_temperature": {
+      "name": "Outdoor temperature",
+      "description": "Outdoor temperature sensor."
+    },
+    "co2_sensor": {
+      "name": "CO₂ sensor (optional)",
+      "description": "Lets the automation wait for CO₂ to drop."
+    },
+    "notify_target": {
+      "name": "Notification target",
+      "description": "Example: notify.mobile_app_your_phone."
+    },
+    "follow_up_entity": {
+      "name": "Follow-up action",
+      "description": "Optionally select an automation or script to run after the alert."
+    },
+    "temp_diff_threshold": {
+      "name": "Temperature difference threshold [°C]"
+    },
+    "base_allowed_minutes": {
+      "name": "Base allowed time [min]"
+    },
+    "per_degree_penalty": {
+      "name": "Time reduction per °C above threshold [min/°C]"
+    },
+    "min_allowed_minutes": {
+      "name": "Minimum allowed time [min]"
+    },
+    "co2_target": {
+      "name": "Target CO₂ [ppm]"
+    },
+    "co2_grace_minutes": {
+      "name": "Extra time with high CO₂ [min]"
+    },
+    "repeat_reminder_minutes": {
+      "name": "Repeat reminder every [min]",
+      "description": "0 disables repeat alerts."
+    }
+  }
+}
