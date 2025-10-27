@@ -11,9 +11,11 @@ Blueprinty są podzielone według typu (np. czujniki, światła, harmonogramy) i
 - `script/` – blueprinty dla skryptów
 - `device_automation/` – automatyzacje powiązane z konkretnymi urządzeniami
 
-Przykładowe gotowe blueprinty w repozytorium:
+Blueprinty dostępne w repozytorium:
 
 - [Strażnik wietrzenia pokoju](room_airing_watchdog/airing_watchdog.md) – monitoruje długość wietrzenia przy dużej różnicy temperatur i przypomina o zamknięciu okna.
+- [Otwarte okno wyłącza climate](open_window_climate_off/open_window_climet_off.md) – wyłącza aktywne urządzenie climate podczas wietrzenia i przywraca poprzedni tryb po zamknięciu okna.
+- [Potwierdzalne powiadomienie](notify/usr_amu_confirmable_notification.md) – wysyła interaktywne powiadomienie z przyciskami potwierdzenia i odrzucenia.
 
 ## 🛠 Jak używać
 
