@@ -59,6 +59,7 @@ blueprint:
 
     temp_diff_threshold:
       name: Próg różnicy temperatur [°C]
+      description: "Minimalna różnica T między wnętrzem a zewnątrz, od której blueprint zacznie odliczać czas wietrzenia."
       default: 6
       selector:
         number:
@@ -69,6 +70,7 @@ blueprint:
 
     base_allowed_minutes:
       name: Bazowy dopuszczalny czas [min]
+      description: "Startowy limit minut przy przekroczeniu progu temperatury — przed zastosowaniem skracania za dodatkowe °C."
       default: 15
       selector:
         number:
@@ -79,6 +81,7 @@ blueprint:
 
     per_degree_penalty:
       name: Skracanie czasu na każdy °C powyżej progu [min/°C]
+      description: "O ile minut blueprint skróci limit wietrzenia za każdy dodatkowy °C powyżej progu różnicy temperatur."
       default: 2
       selector:
         number:
@@ -89,6 +92,7 @@ blueprint:
 
     min_allowed_minutes:
       name: Minimalny dopuszczalny czas [min]
+      description: "Dolna granica limitu — blueprint nigdy nie skróci czasu poniżej tej wartości."
       default: 5
       selector:
         number:
@@ -99,6 +103,7 @@ blueprint:
 
     co2_target:
       name: Docelowe CO₂ [ppm]
+      description: "Poziom CO₂, do którego system będzie próbował zejść przed wysłaniem alarmu (jeśli wskazano czujnik)."
       default: 900
       selector:
         number:
@@ -109,6 +114,7 @@ blueprint:
 
     co2_grace_minutes:
       name: Dodatkowy czas przy wysokim CO₂ [min]
+      description: "Dodatkowe minuty wietrzenia, które blueprint doliczy, jeśli CO₂ wciąż przekracza cel."
       default: 10
       selector:
         number:
@@ -119,7 +125,7 @@ blueprint:
 
     repeat_reminder_minutes:
       name: Powtarzaj przypomnienie co [min]
-      description: 0 wyłącza ponowne alerty.
+      description: "Co ile minut wysyłać kolejne przypomnienia podczas otwartego okna; 0 wyłącza ponowne alerty."
       default: 10
       selector:
         number:
