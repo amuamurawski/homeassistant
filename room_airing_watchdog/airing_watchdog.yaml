@@ -45,7 +45,7 @@ blueprint:
 
     notify_target:
       name: "Kanał powiadomień / Notification target"
-      description: "PL: np. notify.mobile_app_twój_telefon. EN: e.g. notify.mobile_app_your_phone."
+      description: "PL:  np: notify.notify lub np. notify.mobile_app_twój_telefon. EN: e.g. notify.mobile_app_your_phone."
       selector:
         text:
 
