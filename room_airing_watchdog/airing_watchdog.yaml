@@ -135,6 +135,12 @@ blueprint:
           max: 60
           step: 1
           unit_of_measurement: "min"
+    use_persistent_notification:
+      name: Twórz powiadomienie w aplikacji HA
+      description: "Wysyła dodatkowe powiadomienie w aplikacji Home Assistant przy alarmie oraz po zamknięciu okna."
+      default: true
+      selector:
+        boolean:
 
 mode: restart
 max_exceeded: silent
@@ -163,6 +169,7 @@ variables:
   v_co2_target: !input co2_target
   v_co2_grace: !input co2_grace_minutes
   v_repeat: !input repeat_reminder_minutes
+  v_persistent: !input use_persistent_notification
 
 triggers:
   - id: opened
@@ -255,12 +262,24 @@ actions:
                           data:
                             title: "{{ t_notify_title_repeat }}"
                             message: "{{ msg }}"
+              - if:
+                  - condition: template
+                    value_template: "{{ v_persistent }}"
+                then:
+                  - service: persistent_notification.create
+                    data:
+                      title: "{{ t_notify_title_initial }}"
+                      message: "{{ msg }}"
 
       - conditions:
           - condition: trigger
             id: closed
         sequence:
-          - service: persistent_notification.create
-            data:
-              title: "{{ t_window_closed_title }}"
-              message: "{{ t_window_closed_message }}"
+          - if:
+              - condition: template
+                value_template: "{{ v_persistent }}"
+            then:
+              - service: persistent_notification.create
+                data:
+                  title: "{{ t_window_closed_title }}"
+                  message: "{{ t_window_closed_message }}"
