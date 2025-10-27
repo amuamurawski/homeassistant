@@ -1,13 +1,13 @@
 blueprint:
-  name: Room airing watchdog
-  description: Alerts when airing takes too long with a large indoor-outdoor temperature difference and can wait for CO₂ to reach a target.
+  name: Strażnik wietrzenia pokoju
+  description: Powiadamia o zbyt długim wietrzeniu przy dużej różnicy temperatur i opcjonalnie czeka na spadek CO₂.
   domain: automation
   source_url: https://raw.githubusercontent.com/amuamurawski/homeassistant/main/room_airing_watchdog/airing_watchdog.yaml
 
   input:
     window_contact:
-      name: Window or door sensor
-      description: Select the binary open/close sensor.
+      name: Czujnik okna/drzwi
+      description: Wybierz binarny czujnik otwarcia.
       selector:
         entity:
           domain: binary_sensor
@@ -17,24 +17,24 @@ blueprint:
             - opening
 
     room_temperature:
-      name: Room temperature
-      description: Indoor temperature sensor.
+      name: Temperatura w pokoju
+      description: Czujnik temperatury wewnątrz.
       selector:
         entity:
           domain: sensor
           device_class: temperature
 
     outdoor_temperature:
-      name: Outdoor temperature
-      description: Outdoor temperature sensor.
+      name: Temperatura na zewnątrz
+      description: Czujnik temperatury na zewnątrz.
       selector:
         entity:
           domain: sensor
           device_class: temperature
 
     co2_sensor:
-      name: CO₂ sensor (optional)
-      description: Lets the automation wait for CO₂ to drop.
+      name: Czujnik CO₂ (opcjonalny)
+      description: Pozwala czekać na spadek CO₂ przed alarmem.
       default: ""
       selector:
         entity:
@@ -42,14 +42,14 @@ blueprint:
           device_class: carbon_dioxide
 
     notify_target:
-      name: Notification target
-      description: "Example: notify.mobile_app_your_phone."
+      name: Kanał powiadomień
+      description: "Przykład: notify.mobile_app_twój_telefon."
       selector:
         text:
 
     follow_up_entity:
-      name: Follow-up action
-      description: Optionally select an automation or script to run after the alert.
+      name: Dodatkowa reakcja
+      description: Opcjonalnie wybierz automatyzację lub skrypt do uruchomienia po alarmie.
       default: ""
       selector:
         entity:
@@ -58,7 +58,7 @@ blueprint:
             - script
 
     temp_diff_threshold:
-      name: Temperature difference threshold [°C]
+      name: Próg różnicy temperatur [°C]
       default: 6
       selector:
         number:
@@ -68,7 +68,7 @@ blueprint:
           unit_of_measurement: "°C"
 
     base_allowed_minutes:
-      name: Base allowed time [min]
+      name: Bazowy dopuszczalny czas [min]
       default: 15
       selector:
         number:
@@ -78,7 +78,7 @@ blueprint:
           unit_of_measurement: "min"
 
     per_degree_penalty:
-      name: Time reduction per °C above threshold [min/°C]
+      name: Skracanie czasu na każdy °C powyżej progu [min/°C]
       default: 2
       selector:
         number:
@@ -88,7 +88,7 @@ blueprint:
           unit_of_measurement: "min/°C"
 
     min_allowed_minutes:
-      name: Minimum allowed time [min]
+      name: Minimalny dopuszczalny czas [min]
       default: 5
       selector:
         number:
@@ -98,7 +98,7 @@ blueprint:
           unit_of_measurement: "min"
 
     co2_target:
-      name: Target CO₂ [ppm]
+      name: Docelowe CO₂ [ppm]
       default: 900
       selector:
         number:
@@ -108,7 +108,7 @@ blueprint:
           unit_of_measurement: "ppm"
 
     co2_grace_minutes:
-      name: Extra time with high CO₂ [min]
+      name: Dodatkowy czas przy wysokim CO₂ [min]
       default: 10
       selector:
         number:
@@ -118,8 +118,8 @@ blueprint:
           unit_of_measurement: "min"
 
     repeat_reminder_minutes:
-      name: Repeat reminder every [min]
-      description: 0 disables repeat alerts.
+      name: Powtarzaj przypomnienie co [min]
+      description: 0 wyłącza ponowne alerty.
       default: 10
       selector:
         number:
@@ -132,39 +132,16 @@ mode: restart
 max_exceeded: silent
 
 variables:
-  lang: >
-    {% set code = hass.config.language if hass is defined else none %}
-    {% set code = code | string | lower if code is not none else 'en' %}
-    {{ 'pl' if code.startswith('pl') else 'en' }}
-  i18n_raw: >
-    {% set strings = {
-      'pl': {
-        'room': 'Pokój',
-        'unknown': 'nieznany',
-        'diff': 'Różnica T wew–zew',
-        'open': 'Okno otwarte już',
-        'minutes': 'min',
-        'co2_high': 'CO₂ nadal wysokie',
-        'alert': 'Wietrzenie trwa zbyt długo',
-        'still': 'Wietrzenie nadal trwa',
-        'closed_title': 'Okno zamknięte',
-        'closed_msg': 'Wietrzenie zakończone. Okno zostało zamknięte.'
-      },
-      'en': {
-        'room': 'Room',
-        'unknown': 'unknown',
-        'diff': 'Indoor-outdoor temp diff',
-        'open': 'Window open for',
-        'minutes': 'min',
-        'co2_high': 'CO₂ still high',
-        'alert': 'Airing taking too long',
-        'still': 'Airing still in progress',
-        'closed_title': 'Window closed',
-        'closed_msg': 'Airing finished. The window has been closed.'
-      }
-    } %}
-    {{ strings[lang] | tojson }}
-  t: "{{ i18n_raw | from_json }}"
+  t_room_label: "Pokój"
+  t_unknown_room: "nieznany"
+  t_temp_diff_label: "Różnica T wew–zew"
+  t_window_open_label: "Okno otwarte już"
+  t_minutes_suffix: "min"
+  t_co2_high_label: "CO₂ nadal wysokie"
+  t_notify_title_initial: "Wietrzenie trwa zbyt długo"
+  t_notify_title_repeat: "Wietrzenie nadal trwa"
+  t_window_closed_title: "Okno zamknięte"
+  t_window_closed_message: "Wietrzenie zakończone. Okno zostało zamknięte."
   v_window: !input window_contact
   v_room_t: !input room_temperature
   v_out_t: !input outdoor_temperature
@@ -227,15 +204,15 @@ actions:
                 then:
                   - variables:
                       msg: >-
-                        {{ t.room }}: {{ area_name(v_window) or t.unknown }}.
-                        {{ t.diff }}: {{ diff | round(1) }}°C.
-                        {{ t.open }} {{ allowed_min | int }} {{ t.minutes }}.
+                        {{ t_room_label }}: {{ area_name(v_window) or t_unknown_room }}.
+                        {{ t_temp_diff_label }}: {{ diff | round(1) }}°C.
+                        {{ t_window_open_label }} {{ allowed_min | int }} {{ t_minutes_suffix }}.
                         {% if v_co2|length>0 and states(v_co2)|float(0) > v_co2_target %}
-                        {{ t.co2_high }}: {{ states(v_co2)|int }} ppm.
+                        {{ t_co2_high_label }}: {{ states(v_co2)|int }} ppm.
                         {%- endif %}
                   - service: "{{ v_notify }}"
                     data:
-                      title: "{{ t.alert }}"
+                      title: "{{ t_notify_title_initial }}"
                       message: "{{ msg }}"
                   - if:
                       - condition: template
@@ -268,7 +245,7 @@ actions:
                             minutes: !input repeat_reminder_minutes
                         - service: "{{ v_notify }}"
                           data:
-                            title: "{{ t.still }}"
+                            title: "{{ t_notify_title_repeat }}"
                             message: "{{ msg }}"
 
       - conditions:
@@ -277,5 +254,5 @@ actions:
         sequence:
           - service: persistent_notification.create
             data:
-              title: "{{ t.closed_title }}"
-              message: "{{ t.closed_msg }}"
+              title: "{{ t_window_closed_title }}"
+              message: "{{ t_window_closed_message }}"
