@@ -47,8 +47,7 @@ blueprint:
       name: "Kanał powiadomień / Notification target"
       description: "PL: np. notify.mobile_app_twój_telefon. EN: e.g. notify.mobile_app_your_phone."
       selector:
-        service:
-          domain: notify
+        text:
 
     follow_up_entity:
       name: "Dodatkowa reakcja / Follow-up action"
