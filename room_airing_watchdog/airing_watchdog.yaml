@@ -132,8 +132,8 @@ variables:
   v_notify_raw: !input notify_target
   v_notify: >-
     {% set raw = v_notify_raw if v_notify_raw is string else '' %}
-    {% set cleaned = raw | replace('\r', '\n') | replace(',', '\n') %}
-    {% set parts = cleaned | split('\n') %}
+    {% set cleaned = raw.replace('\r', '\n').replace(',', '\n') %}
+    {% set parts = cleaned.split('\n') %}
     {{ parts | map('trim') | select('ne', '') | list }}
   v_open_follow: !input open_follow_up_action
   v_close_follow: !input close_follow_up_action
