@@ -11,6 +11,10 @@ Blueprinty są podzielone według typu (np. czujniki, światła, harmonogramy) i
 - `script/` – blueprinty dla skryptów
 - `device_automation/` – automatyzacje powiązane z konkretnymi urządzeniami
 
+Przykładowe gotowe blueprinty w repozytorium:
+
+- [Strażnik wietrzenia pokoju](room_airing_watchdog/airing_watchdog.md) – monitoruje długość wietrzenia przy dużej różnicy temperatur i przypomina o zamknięciu okna.
+
 ## 🛠 Jak używać
 
 1. Przejdź do **Ustawienia → Automatyzacje i sceny → Blueprinty** w Home Assistant.
