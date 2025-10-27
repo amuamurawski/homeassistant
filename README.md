@@ -5,11 +5,11 @@ Znajdziesz tu gotowe szablony automatyzacji, które możesz łatwo zaimportować
 
 ## 📚 Blueprinty dostępne w repozytorium
 
-| Blueprint | Opis |
-| --- | --- |
-| 🌬️ [Strażnik wietrzenia pokoju](room_airing_watchdog/airing_watchdog.md) | Monitoruje długość wietrzenia przy dużej różnicy temperatur i przypomina o zamknięciu okna. |
-| 🪟 [Otwarte okno wyłącza climate](open_window_climate_off/open_window_climet_off.md) | Wyłącza aktywne urządzenie climate podczas wietrzenia i przywraca poprzedni tryb po zamknięciu okna. |
-| 🔔 [Potwierdzalne powiadomienie](notify/usr_amu_confirmable_notification.md) | Wysyła interaktywne powiadomienie z przyciskami potwierdzenia i odrzucenia. |
+| Blueprint | Katalog | Opis |
+| --- | --- | --- |
+| 🌬️ [Strażnik wietrzenia pokoju](room_airing_watchdog/airing_watchdog.md) | `room_airing_watchdog/` | Monitoruje długość wietrzenia przy dużej różnicy temperatur i przypomina o zamknięciu okna. |
+| 🪟 [Otwarte okno wyłącza climate](open_window_climate_off/open_window_climet_off.md) | `open_window_climate_off/` | Wyłącza aktywne urządzenie climate podczas wietrzenia i przywraca poprzedni tryb po zamknięciu okna. |
+| 🔔 [Potwierdzalne powiadomienie](notify/usr_amu_confirmable_notification.md) | `notify/` | Wysyła interaktywne powiadomienie z przyciskami potwierdzenia i odrzucenia. |
 
 ## 🛠 Jak używać
 
