@@ -134,7 +134,7 @@ mode: restart
 max_exceeded: silent
 
 variables:
-  lang: "{{ 'pl' if (hass.config.language | default('en') | string | lower).startswith('pl') else 'en' }}"
+  lang: "{{ 'pl' if (hass is defined and (hass.config.language | default('en') | string | lower).startswith('pl')) else 'en' }}"
   t_room_label: "{{ 'Pokój' if lang == 'pl' else 'Room' }}"
   t_unknown_room: "{{ 'nieznany' if lang == 'pl' else 'unknown' }}"
   t_temp_diff_label: "{{ 'Różnica T wew–zew' if lang == 'pl' else 'Indoor-outdoor temp diff' }}"
