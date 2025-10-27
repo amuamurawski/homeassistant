@@ -1,45 +1,39 @@
 blueprint:
-  name: Strażnik wietrzenia pokoju
+  name: Strażnik wietrzenia pokoju / Room airing watchdog
   description: |
-    Alertuje, gdy wietrzenie trwa zbyt długo przy dużej różnicy temp. wewnątrz–na zewnątrz.
-    Opcjonalnie czeka, aż CO₂ spadnie do celu, a w czasie wietrzenia wstrzymuje ogrzewanie
-    i przywraca je po zamknięciu okna.
+    PL: Alertuje, gdy wietrzenie trwa zbyt długo przy dużej różnicy temperatur i opcjonalnie czeka, aż CO₂ spadnie do celu. Może wywołać wskazany skrypt lub automatyzację.
+    EN: Alerts when airing takes too long with a large indoor-outdoor temperature difference and can wait for CO₂ to reach a target. Can trigger a selected script or automation.
   domain: automation
   source_url: local/blueprints/airing_watchdog.yaml
 
   input:
     window_contact:
-      name: Czujnik okna/drzwi
-      description: Binary sensor stanu otwarcia w pomieszczeniu
+      name: "Czujnik okna/drzwi / Window or door sensor"
+      description: "PL: Wybierz binarny czujnik otwarcia. EN: Select the binary open/close sensor."
       selector:
         entity:
           domain: binary_sensor
           device_class: opening
 
     room_temperature:
-      name: Temperatura w pokoju
+      name: "Temperatura w pokoju / Room temperature"
+      description: "PL: Czujnik temperatury wewnątrz. EN: Indoor temperature sensor."
       selector:
         entity:
           domain: sensor
           device_class: temperature
 
     outdoor_temperature:
-      name: Temperatura na zewnątrz
+      name: "Temperatura na zewnątrz / Outdoor temperature"
+      description: "PL: Czujnik temperatury na zewnątrz. EN: Outdoor temperature sensor."
       selector:
         entity:
           domain: sensor
           device_class: temperature
 
-    climate_entity:
-      name: Termostat w pokoju
-      description: Opcjonalny — wstrzymuje ogrzewanie przy otwartym oknie
-      default: ""
-      selector:
-        entity:
-          domain: climate
-
     co2_sensor:
-      name: Czujnik CO₂ (opcjonalny)
+      name: "Czujnik CO₂ (opcjonalny) / CO₂ sensor (optional)"
+      description: "PL: Pozwala czekać na spadek CO₂. EN: Lets the automation wait for CO₂ to drop."
       default: ""
       selector:
         entity:
@@ -47,13 +41,23 @@ blueprint:
           device_class: carbon_dioxide
 
     notify_target:
-      name: Kanał powiadomień (notify)
-      description: np. notify.mobile_app_twój_telefon
+      name: "Kanał powiadomień / Notification target"
+      description: "PL: np. notify.mobile_app_twój_telefon. EN: e.g. notify.mobile_app_your_phone."
       selector:
         text:
 
+    follow_up_entity:
+      name: "Dodatkowa reakcja / Follow-up action"
+      description: "PL: Opcjonalnie wybierz automatyzację lub skrypt do uruchomienia po alarmie. EN: Optionally select an automation or script to run after the alert."
+      default: ""
+      selector:
+        entity:
+          domain:
+            - automation
+            - script
+
     temp_diff_threshold:
-      name: Próg różnicy temperatur [°C]
+      name: "Próg różnicy temperatur [°C] / Temperature difference threshold [°C]"
       default: 6
       selector:
         number:
@@ -63,7 +67,7 @@ blueprint:
           unit_of_measurement: "°C"
 
     base_allowed_minutes:
-      name: Bazowy dopuszczalny czas [min]
+      name: "Bazowy dopuszczalny czas [min] / Base allowed time [min]"
       default: 15
       selector:
         number:
@@ -73,7 +77,7 @@ blueprint:
           unit_of_measurement: "min"
 
     per_degree_penalty:
-      name: Skracanie czasu na każdy °C powyżej progu [min/°C]
+      name: "Skracanie czasu na każdy °C powyżej progu [min/°C] / Time reduction per °C above threshold [min/°C]"
       default: 2
       selector:
         number:
@@ -83,7 +87,7 @@ blueprint:
           unit_of_measurement: "min/°C"
 
     min_allowed_minutes:
-      name: Minimalny dopuszczalny czas [min]
+      name: "Minimalny dopuszczalny czas [min] / Minimum allowed time [min]"
       default: 5
       selector:
         number:
@@ -93,7 +97,7 @@ blueprint:
           unit_of_measurement: "min"
 
     co2_target:
-      name: Docelowe CO₂ [ppm]
+      name: "Docelowe CO₂ [ppm] / Target CO₂ [ppm]"
       default: 900
       selector:
         number:
@@ -103,7 +107,7 @@ blueprint:
           unit_of_measurement: "ppm"
 
     co2_grace_minutes:
-      name: Dodatkowy czas przy wysokim CO₂ [min]
+      name: "Dodatkowy czas przy wysokim CO₂ [min] / Extra time with high CO₂ [min]"
       default: 10
       selector:
         number:
@@ -111,28 +115,10 @@ blueprint:
           max: 60
           step: 1
           unit_of_measurement: "min"
-
-    pause_heating_mode:
-      name: Tryb pauzy ogrzewania
-      default: off
-      selector:
-        select:
-          options:
-            - label: Wyłącz ogrzewanie (hvac_mode off)
-              value: off
-            - label: ECO (preset eco)
-              value: eco
-            - label: Brak (nie wstrzymuj)
-              value: none
-
-    restore_on_close:
-      name: Przywracaj ustawienia po zamknięciu okna
-      default: true
-      selector:
-        boolean:
 
     repeat_reminder_minutes:
-      name: Powtarzaj przypomnienie co [min]
+      name: "Powtarzaj przypomnienie co [min] / Repeat reminder every [min]"
+      description: "PL: 0 wyłącza ponowne alerty. EN: 0 disables repeat alerts."
       default: 10
       selector:
         number:
@@ -140,15 +126,6 @@ blueprint:
           max: 60
           step: 1
           unit_of_measurement: "min"
-
-    quiet_hours:
-      name: Godziny ciche (nocne)
-      default:
-        - "22:00:00"
-        - "07:00:00"
-      selector:
-        time:
-          multiple: true
 
 mode: restart
 max_exceeded: silent
@@ -164,21 +141,19 @@ variables:
   t_notify_title_initial: "{{ 'Wietrzenie trwa zbyt długo' if lang == 'pl' else 'Airing taking too long' }}"
   t_notify_title_repeat: "{{ 'Wietrzenie nadal trwa' if lang == 'pl' else 'Airing still in progress' }}"
   t_window_closed_title: "{{ 'Okno zamknięte' if lang == 'pl' else 'Window closed' }}"
-  t_window_closed_message: "{{ 'Ustawienia ogrzewania przywrócone, jeśli były wstrzymane.' if lang == 'pl' else 'Heating settings restored if they were paused.' }}"
+  t_window_closed_message: "{{ 'Wietrzenie zakończone. Okno zostało zamknięte.' if lang == 'pl' else 'Airing finished. The window has been closed.' }}"
   v_window: !input window_contact
   v_room_t: !input room_temperature
   v_out_t: !input outdoor_temperature
-  v_climate: !input climate_entity
   v_co2: !input co2_sensor
   v_notify: !input notify_target
+  v_follow: !input follow_up_entity
   v_thr: !input temp_diff_threshold
   v_base: !input base_allowed_minutes
   v_pen: !input per_degree_penalty
   v_min: !input min_allowed_minutes
   v_co2_target: !input co2_target
   v_co2_grace: !input co2_grace_minutes
-  v_pause: !input pause_heating_mode
-  v_restore: !input restore_on_close
   v_repeat: !input repeat_reminder_minutes
 
 triggers:
@@ -210,40 +185,6 @@ actions:
               - condition: template
                 value_template: "{{ diff >= v_thr }}"
             then:
-              - if:
-                  - condition: template
-                    value_template: "{{ v_climate != '' and v_pause != 'none' }}"
-                then:
-                  - choose:
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ v_pause == 'off' }}"
-                        sequence:
-                          - service: scene.create
-                            data:
-                              scene_id: "snapshot_airing_{{ v_climate | replace('.', '_') }}"
-                              snapshot_entities:
-                                - !input climate_entity
-                          - service: climate.set_hvac_mode
-                            target:
-                              entity_id: !input climate_entity
-                            data:
-                              hvac_mode: "off"
-                      - conditions:
-                          - condition: template
-                            value_template: "{{ v_pause == 'eco' }}"
-                        sequence:
-                          - service: scene.create
-                            data:
-                              scene_id: "snapshot_airing_{{ v_climate | replace('.', '_') }}"
-                              snapshot_entities:
-                                - !input climate_entity
-                          - service: climate.set_preset_mode
-                            target:
-                              entity_id: !input climate_entity
-                            data:
-                              preset_mode: "eco"
-
               - variables:
                   latest_deadline_sec: "{{ (allowed_min + (v_co2_grace if v_co2|length>0 else 0)) * 60 }}"
 
@@ -273,6 +214,25 @@ actions:
                     data:
                       title: "{{ t_notify_title_initial }}"
                       message: "{{ msg }}"
+                  - if:
+                      - condition: template
+                        value_template: "{{ v_follow | length > 0 }}"
+                    then:
+                      - choose:
+                          - conditions:
+                              - condition: template
+                                value_template: "{{ v_follow.startswith('automation.') }}"
+                            sequence:
+                              - service: automation.trigger
+                                target:
+                                  entity_id: "{{ v_follow }}"
+                          - conditions:
+                              - condition: template
+                                value_template: "{{ v_follow.startswith('script.') }}"
+                            sequence:
+                              - service: script.turn_on
+                                target:
+                                  entity_id: "{{ v_follow }}"
                   - repeat:
                       while:
                         - condition: state
@@ -292,13 +252,6 @@ actions:
           - condition: trigger
             id: closed
         sequence:
-          - if:
-              - condition: template
-                value_template: "{{ v_restore and v_climate != '' }}"
-            then:
-              - service: scene.turn_on
-                data:
-                  entity_id: "scene.snapshot_airing_{{ v_climate | replace('.', '_') }}"
           - service: persistent_notification.create
             data:
               title: "{{ t_window_closed_title }}"
