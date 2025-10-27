@@ -1,12 +1,10 @@
 blueprint:
   name: Strażnik wietrzenia pokoju / Room airing watchdog
   description: |
-    PL: Alertuje, gdy wietrzenie trwa zbyt długo przy dużej różnicy temperatur i opcjonalnie czeka, aż CO₂ spadnie do celu. Może wywołać wskazany skrypt lub automatyzację.
-    EN: Alerts when airing takes too long with a large indoor-outdoor temperature difference and can wait for CO₂ to reach a target. Can trigger a selected script or automation.
+    PL (v1.2.0): Alertuje, gdy wietrzenie trwa zbyt długo przy dużej różnicy temperatur i opcjonalnie czeka, aż CO₂ spadnie do celu. Może wywołać wskazany skrypt lub automatyzację.
+    EN (v1.2.0): Alerts when airing takes too long with a large indoor-outdoor temperature difference and can wait for CO₂ to reach a target. Can trigger a selected script or automation.
   domain: automation
   source_url: https://raw.githubusercontent.com/amuamurawski/homeassistant/main/room_airing_watchdog/airing_watchdog.yaml
-  metadata:
-    version: "1.2.0"
 
   input:
     window_contact:
