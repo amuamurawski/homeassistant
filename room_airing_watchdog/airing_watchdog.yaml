@@ -4,7 +4,7 @@ blueprint:
     PL: Aalertuje, gdy wietrzenie trwa zbyt długo przy dużej różnicy temperatur i opcjonalnie czeka, aż CO₂ spadnie do celu. Może wywołać wskazany skrypt lub automatyzację.
     EN: Alerts when airing takes too long with a large indoor-outdoor temperature difference and can wait for CO₂ to reach a target. Can trigger a selected script or automation.
   domain: automation
-  source_url: https://github.com/amuamurawski/homeassistant/blob/main/room_airing_watchdog/airing_watchdog.yaml
+  source_url: https://raw.githubusercontent.com/amuamurawski/homeassistant/main/room_airing_watchdog/airing_watchdog.yaml
 
   input:
     window_contact:
