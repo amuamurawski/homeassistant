@@ -22,7 +22,8 @@
 | Parametr | Typ | Domyślnie | Opis |
 | --- | --- | --- | --- |
 | `co2_sensor` | `sensor` (`carbon_dioxide`, `volatile_organic_compounds_parts`) | pusty | Wstrzymuje alarm do czasu spadku CO₂ poniżej celu. |
-| `follow_up_entity` | `automation` lub `script` | pusty | Sekwencja uruchamiana po podniesieniu alarmu. |
+| `open_follow_up_action` | akcja | brak | Sekwencja akcji wykonywana razem z powiadomieniem o zbyt długim wietrzeniu (np. komunikat TTS, pauza ogrzewania). |
+| `close_follow_up_action` | akcja | brak | Sekwencja akcji wykonywana po wykryciu zamknięcia okna (np. wznowienie ogrzewania, komunikat głosowy). |
 | `repeat_reminder_minutes` | liczba | 10 | Interwał kolejnych przypomnień; `0` wyłącza powtórki. |
 | `use_persistent_notification` | bool | `true` | Tworzy powiadomienie w interfejsie HA przy alarmie i po zamknięciu okna. |
 
@@ -51,12 +52,12 @@
 4. Blueprint czeka na zamknięcie okna lub spadek CO₂ (jeżeli podano czujnik) przez `allowed_minutes` oraz (gdy trzeba) dodatkowe `co2_grace_minutes`.
 5. Po przekroczeniu limitu wysyłane jest powiadomienie z informacją o pokoju (`area_name`), różnicy temperatur oraz czasie otwarcia.
 6. Dopóki okno pozostaje otwarte i ustawiono `repeat_reminder_minutes`, kolejne przypomnienia trafiają do wskazanego kanału.
-7. `follow_up_entity` umożliwia uruchomienie dodatkowej automatyzacji lub skryptu, a `use_persistent_notification` dodaje powiadomienia w interfejsie Home Assistant.
+7. `open_follow_up_action` pozwala wykonać dodatkowe akcje razem z alarmem (np. powiadomienie głosowe, sterowanie ogrzewaniem), `close_follow_up_action` zadziała po zamknięciu okna, a `use_persistent_notification` dodaje powiadomienia w interfejsie HA.
 
 ## 💡 Przykładowe scenariusze
 - Zimowe przypomnienia o zamknięciu okna, aby nie dogrzewać niepotrzebnie pomieszczenia.
 - Kontrola jakości powietrza w pokoju dziecka: alarm dopiero po spadku CO₂ poniżej celu.
-- Integracja z ogrzewaniem lub klimatyzacją poprzez `follow_up_entity`, np. pauza pieca lub odmrożenie harmonogramu.
+- Integracja z ogrzewaniem lub klimatyzacją poprzez `open_follow_up_action`/`close_follow_up_action`, np. pauza pieca podczas wietrzenia i automatyczne wznowienie po zamknięciu okna.
 
 ## 🔗 Import blueprintu
 `https://raw.githubusercontent.com/amuamurawski/homeassistant/main/room_airing_watchdog/airing_watchdog.yaml`

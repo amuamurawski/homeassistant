@@ -49,15 +49,19 @@ blueprint:
       selector:
         text:
 
-    follow_up_entity:
-      name: Dodatkowa reakcja
-      description: Opcjonalnie wybierz automatyzację lub skrypt do uruchomienia po alarmie.
-      default: ""
+    open_follow_up_action:
+      name: Dodatkowa reakcja przy alarmie (opcjonalnie)
+      description: Akcje wykonywane razem z powiadomieniem o zbyt długim wietrzeniu (np. komunikat TTS, pauza ogrzewania).
+      default: []
       selector:
-        entity:
-          domain:
-            - automation
-            - script
+        action: {}
+
+    close_follow_up_action:
+      name: Dodatkowa reakcja przy zamknięciu (opcjonalnie)
+      description: Akcje wykonywane po wykryciu zamknięcia okna (np. wznowienie ogrzewania, powiadomienie głosowe).
+      default: []
+      selector:
+        action: {}
 
     temp_diff_threshold:
       name: Próg różnicy temperatur [°C]
@@ -161,7 +165,8 @@ variables:
   v_out_t: !input outdoor_temperature
   v_co2: !input co2_sensor
   v_notify: !input notify_target
-  v_follow: !input follow_up_entity
+  v_open_follow: !input open_follow_up_action
+  v_close_follow: !input close_follow_up_action
   v_thr: !input temp_diff_threshold
   v_base: !input base_allowed_minutes
   v_pen: !input per_degree_penalty
@@ -231,23 +236,8 @@ actions:
                       message: "{{ msg }}"
                   - if:
                       - condition: template
-                        value_template: "{{ v_follow | length > 0 }}"
-                    then:
-                      - choose:
-                          - conditions:
-                              - condition: template
-                                value_template: "{{ v_follow.startswith('automation.') }}"
-                            sequence:
-                              - service: automation.trigger
-                                target:
-                                  entity_id: "{{ v_follow }}"
-                          - conditions:
-                              - condition: template
-                                value_template: "{{ v_follow.startswith('script.') }}"
-                            sequence:
-                              - service: script.turn_on
-                                target:
-                                  entity_id: "{{ v_follow }}"
+                        value_template: "{{ v_open_follow | length > 0 }}"
+                    then: !input open_follow_up_action
                   - repeat:
                       while:
                         - condition: state
@@ -283,3 +273,7 @@ actions:
                 data:
                   title: "{{ t_window_closed_title }}"
                   message: "{{ t_window_closed_message }}"
+          - if:
+              - condition: template
+                value_template: "{{ v_close_follow | length > 0 }}"
+            then: !input close_follow_up_action
