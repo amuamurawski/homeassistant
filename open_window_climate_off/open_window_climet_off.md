@@ -1,33 +1,44 @@
-# Otwarte okno wyłącza urządzenie climate – dokumentacja
+# 🪟 Otwarte okno wyłącza urządzenie climate
 
-## Przeznaczenie
-- Automatyzacja wyłącza aktywny system grzewczy lub chłodzący (`climate`) po wykryciu otwartego okna.
-- Przywraca poprzedni tryb HVAC, gdy okno zostanie zamknięte i upłynie zadany czas bezczynności.
-- Opcjonalnie uruchamia dodatkowe akcje przy otwarciu i zamknięciu okna (np. komunikat TTS, sterowanie roletą).
+> Automatyczne oszczędzanie energii: gdy okno zostaje otwarte, aktywny klimatyzator lub ogrzewanie przechodzi w stan wstrzymania, a po zamknięciu wraca do poprzedniego trybu.
 
-## Wymagane wejścia
-- `window_entity` – binarny czujnik okna/drzwi (klasa urządzenia `window` lub `door`).
-- `climate_target` – urządzenie typu `climate`, które ma być włączane/wyłączane.
+## 🧾 Szybki podgląd
+- **Typ**: `automation`
+- **Steruje**: urządzeniem `climate` (HVAC)
+- **Główne zadanie**: wyłączenie HVAC podczas wietrzenia i przywrócenie ustawień po zamknięciu okna
 
-## Parametry czasowe
-- `minimum_open_time` – minimalny czas (s), przez jaki okno musi pozostawać otwarte, zanim automatyzacja wyłączy urządzenie (domyślnie 12 s).
-- `minimum_close_time` – opóźnienie (s) po zamknięciu okna przed ponownym uruchomieniem urządzenia (domyślnie 12 s).
+## 🔌 Wejścia blueprintu
 
-## Akcje opcjonalne
-- `open_action` – dodatkowe działania wykonywane tuż po otwarciu i wyłączeniu urządzenia (domyślnie brak).
-- `close_action` – działania wykonywane przed ponownym włączeniem urządzenia po zamknięciu okna (domyślnie brak).
+### Wymagane
+| Parametr | Typ | Domyślnie | Opis |
+| --- | --- | --- | --- |
+| `window_entity` | `binary_sensor` (`window`, `door`) | – | Czujnik wykrywający otwarte okno lub drzwi. |
+| `climate_target` | `climate` | – | Urządzenie, które ma być włączane i wyłączane. |
 
-## Logika działania
-1. Trigger uruchamia się po zmianie sensora okna na `on` i utrzymaniu tego stanu przez `minimum_open_time`.
-2. Blueprint sprawdza, czy urządzenie `climate` nie jest już wyłączone (`off`). Jeśli jest aktywne w jednym z obsługiwanych trybów (`cool`, `heat_cool`, `heat`, `automatic`, `auto`, `dry`, `fan_only`), zapisuje bieżący tryb.
-3. Urządzenie climate zostaje wyłączone (`climate.turn_off`), a następnie opcjonalnie wykonywany jest `open_action`.
-4. Automatyzacja czeka, aż sensor okna wróci do stanu `off`, po czym odczekuje `minimum_close_time`.
-5. Wykonuje `close_action` (jeżeli zdefiniowano) i przywraca poprzedni tryb HVAC (`climate.set_hvac_mode`) odpowiadający wcześniej wykrytemu stanowi.
+### Parametry czasowe
+| Parametr | Domyślnie | Opis |
+| --- | --- | --- |
+| `minimum_open_time` | 12 s | Minimalny czas otwarcia okna wymagany do aktywacji automatyzacji. |
+| `minimum_close_time` | 12 s | Czas oczekiwania po zamknięciu okna przed ponownym uruchomieniem HVAC. |
 
-## Przykładowe zastosowania
-- Automatyczne wyłączanie ogrzewania podczas wietrzenia pomieszczenia.
-- Kontrola klimatyzacji w biurze, aby uniknąć strat energii przy otwartych oknach.
-- Integracja z innymi akcjami, np. sterowanie wentylacją nawiewną, powiadomienia głosowe.
+### Akcje dodatkowe
+| Parametr | Domyślnie | Opis |
+| --- | --- | --- |
+| `open_action` | brak | Sekwencja akcji wykonywana tuż po wyłączeniu HVAC (np. powiadomienie TTS). |
+| `close_action` | brak | Sekwencja akcji przed ponownym uruchomieniem urządzenia po zamknięciu okna. |
 
-## Import blueprintu
+## 🧠 Jak to działa
+1. Okno musi pozostawać otwarte przez `minimum_open_time`. Dopiero wtedy trigger rozpoczyna sekwencję.
+2. Blueprint sprawdza, czy urządzenie `climate` jest w jednym z obsługiwanych trybów (`cool`, `heat_cool`, `heat`, `automatic`, `auto`, `dry`, `fan_only`). Jeżeli tak, zapamiętuje bieżący tryb.
+3. Urządzenie zostaje wyłączone (`climate.turn_off`). Jeśli zdefiniowano `open_action`, ta sekwencja jest wykonywana.
+4. Automatyzacja czeka na zamknięcie okna. Po zmianie stanu na `off` odczekuje `minimum_close_time`, aby uniknąć gwałtownego przełączania.
+5. Tuż przed ponownym uruchomieniem HVAC wykonywany jest `close_action` (jeśli podany).
+6. Blueprint przywraca wcześniej zanotowany tryb urządzenia (`climate.set_hvac_mode`), dzięki czemu HVAC wraca do normalnej pracy.
+
+## 💡 Przykładowe scenariusze
+- Pauzowanie ogrzewania w salonie podczas wietrzenia zimą.
+- Automatyczne wyłączanie klimatyzacji w sypialni, gdy zostaną uchylone drzwi balkonowe.
+- Integracja z powiadomieniami głosowymi: informacja o wstrzymaniu ogrzewania po otwarciu okna.
+
+## 🔗 Import blueprintu
 `https://github.com/amuamurawski/homeassistant/blob/main/open_window_climate_off/open_window_climet_off.yaml`

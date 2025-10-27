@@ -1,32 +1,40 @@
-# Potwierdzalne powiadomienie – dokumentacja
+# 🔔 Potwierdzalne powiadomienie
 
-## Przeznaczenie
-- Skrypt wysyła do wybranego urządzenia mobilnego interaktywne powiadomienie Home Assistant.
-- Odbiorca może potwierdzić lub odrzucić komunikat; każda odpowiedź uruchamia oddzielnie zdefiniowane akcje.
-- Rozwiązanie sprawdza się przy scenariuszach wymagających potwierdzenia użytkownika, np. przed uruchomieniem alarmu czy otwarciem bramy.
+> Interaktywne powiadomienia w aplikacji Home Assistant, które wymagają świadomego potwierdzenia lub odrzucenia, zanim uruchomią kolejne akcje.
 
-## Wymagane wejścia
-- `notify_device` – urządzenie z integracją `mobile_app`, które odbierze powiadomienie.
-- `message` – treść komunikatu wyświetlanego w powiadomieniu.
+## 🧾 Szybki podgląd
+- **Typ**: `script`
+- **Obsługiwane urządzenia**: każde z integracją `mobile_app`
+- **Przeznaczenie**: sytuacje, w których użytkownik musi zatwierdzić akcję (np. wyłączenie alarmu, otwieranie bramy)
 
-## Opcjonalne parametry
-- `title` – tytuł powiadomienia (domyślnie pusty).
-- `confirm_text` – etykieta przycisku potwierdzenia (domyślnie `Confirm`).
-- `confirm_action` – sekwencja akcji wykonywana po potwierdzeniu.
-- `dismiss_text` – etykieta przycisku odrzucenia (domyślnie `Dismiss`).
-- `dismiss_action` – sekwencja akcji wykonywana po odrzuceniu.
-- `timeout_seconds` – maksymalny czas oczekiwania na odpowiedź (domyślnie 60 s).
+## 🔌 Wejścia skryptu
 
-## Logika działania
-1. Skrypt generuje unikalne identyfikatory przycisków opartych na `context.id`.
-2. Wysyła powiadomienie `notify.notify` z dwoma akcjami (potwierdzenie i odrzucenie).
-3. Oczekuje na zdarzenie `mobile_app_notification_action` z jednego z przycisków albo na upłynięcie limitu czasu.
-4. W zależności od otrzymanej odpowiedzi uruchamia `confirm_action` lub `dismiss_action`. Jeśli użytkownik nie odpowie, skrypt kończy działanie bez dodatkowych akcji.
+### Wymagane
+| Parametr | Typ | Domyślnie | Opis |
+| --- | --- | --- | --- |
+| `notify_device` | `device` (`mobile_app`) | – | Urządzenie mobilne, które otrzyma powiadomienie. |
+| `message` | tekst | – | Treść komunikatu wyświetlanego użytkownikowi. |
 
-## Przykładowe zastosowania
-- Potwierdzenie wyłączenia alarmu lub uzbrojenia systemu bezpieczeństwa.
-- Zapytanie, czy włączyć ogrzewanie/klimatyzację przed powrotem do domu.
-- Decyzja o otwarciu bramy wjazdowej lub furtki.
+### Opcjonalne
+| Parametr | Domyślnie | Opis |
+| --- | --- | --- |
+| `title` | pusty | Tytuł powiadomienia. |
+| `confirm_text` | `Confirm` | Tekst przycisku potwierdzającego. |
+| `confirm_action` | brak | Akcje wykonywane po potwierdzeniu. |
+| `dismiss_text` | `Dismiss` | Tekst przycisku odrzucającego. |
+| `dismiss_action` | brak | Akcje wykonywane po odrzuceniu. |
+| `timeout_seconds` | 60 | Limit czasu na odpowiedź; po jego przekroczeniu skrypt kończy działanie. |
 
-## Import blueprintu
+## 🧠 Jak to działa
+1. Skrypt generuje unikalne identyfikatory akcji na podstawie `context.id`.
+2. Wysyła powiadomienie (`notify.notify`) z dwoma przyciskami: potwierdzenia i odrzucenia.
+3. Oczekuje na zdarzenie `mobile_app_notification_action` z wybraną akcją lub na upłynięcie limitu czasu (`timeout_seconds`).
+4. W zależności od odpowiedzi użytkownika uruchamia `confirm_action`, `dismiss_action`, albo kończy się bez efektu po przekroczeniu czasu.
+
+## 💡 Przykłady użycia
+- Potwierdzenie wyłączenia systemu alarmowego.
+- Pytanie, czy rozpocząć nagrzewanie samochodu/sauny przed powrotem do domu.
+- Decyzja o otwarciu bramy wjazdowej z zachowaniem potwierdzenia.
+
+## 🔗 Import blueprintu
 `https://github.com/amuamurawski/homeassistant/blob/main/notify/usr_amu_confirmable_notification.yaml`

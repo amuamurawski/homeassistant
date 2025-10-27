@@ -1,57 +1,62 @@
-# Strażnik wietrzenia pokoju – dokumentacja
+# 🌬️ Strażnik wietrzenia pokoju
 
-## Przeznaczenie
-- Automatyzacja pilnuje, aby okno lub drzwi nie pozostawały zbyt długo otwarte przy dużej różnicy temperatur między wnętrzem a zewnątrz.
-- Może wstrzymać alarm, jeżeli w pomieszczeniu nadal przekroczony jest zadany poziom CO₂ (wymaga wskazania czujnika).
-- Wysyła powiadomienia na wskazany kanał i opcjonalnie uruchamia dodatkowe akcje po alarmie.
+> Inteligentny strażnik pilnuje, aby otwarte okno nie wychłodziło domu. Gdy różnica temperatur jest zbyt duża, przypomni o zamknięciu okna, a przy potrzebie przewietrzenia (CO₂) da jeszcze chwilę oddechu.
 
-## Wymagane wejścia
-- `window_contact` – binarny czujnik okna/drzwi (klasa urządzenia `door`, `window` lub `opening`).
-- `room_temperature` – czujnik temperatury wewnętrznej (sensor z klasą `temperature`).
-- `outdoor_temperature` – czujnik temperatury zewnętrznej (również klasa `temperature`).
-- `notify_target` – usługa powiadomień, np. `notify.mobile_app_moj_telefon`.
+## 🧾 Szybki podgląd
+- **Typ**: `automation`
+- **Nadzoruje**: czas otwartego okna przy dużej różnicy temperatur
+- **Powiadomienia**: kanał `notify`, opcjonalnie powiadomienia trwałe i dodatkowe akcje
+- **Wymaga**: czujnika okna, temperatury wewnętrznej i zewnętrznej
 
-## Opcjonalne elementy
-- `co2_sensor` – dodatkowy czujnik CO₂; umożliwia wstrzymanie alarmu do czasu spadku stężenia poniżej progu.
-- `follow_up_entity` – automatyzacja lub skrypt do uruchomienia po wysłaniu alarmu.
-- `repeat_reminder_minutes` – interwał kolejnych przypomnień; ustaw `0`, aby je wyłączyć.
-- `use_persistent_notification` – tworzy także powiadomienia w interfejsie Home Assistant.
+## 🔌 Wejścia blueprintu
 
-## Kluczowe parametry czasowe i progi
-- `temp_diff_threshold` (domyślnie 6 °C) – minimalna różnica temperatur, od której blueprint zaczyna odliczać czas.
-- `base_allowed_minutes` (domyślnie 15 min) – początkowy limit czasu wietrzenia po przekroczeniu progu.
-- `per_degree_penalty` (domyślnie 2 min/°C) – skracanie limitu za każdy dodatkowy stopień powyżej progu.
-- `min_allowed_minutes` (domyślnie 5 min) – gwarantowany minimalny czas, poniżej którego limit nie spadnie.
-- `co2_target` (domyślnie 900 ppm) – docelowy poziom CO₂; poniżej tej wartości alarm nie zostanie wyzwolony.
-- `co2_grace_minutes` (domyślnie 10 min) – dodatkowy czas na wietrzenie, gdy CO₂ wciąż jest powyżej celu.
+### Wymagane
+| Parametr | Typ | Domyślnie | Opis |
+| --- | --- | --- | --- |
+| `window_contact` | `binary_sensor` (`door`, `window`, `opening`) | – | Czujnik otwarcia okna lub drzwi. |
+| `room_temperature` | `sensor` (`temperature`) | – | Czujnik temperatury w pomieszczeniu. |
+| `outdoor_temperature` | `sensor` (`temperature`) | – | Czujnik temperatury na zewnątrz. |
+| `notify_target` | `notify` target | – | Kanał powiadomień, np. `notify.mobile_app_moj_telefon`. |
 
-Limit czasu dla otwartego okna obliczany jest według wzoru:
+### Opcjonalne
+| Parametr | Typ | Domyślnie | Opis |
+| --- | --- | --- | --- |
+| `co2_sensor` | `sensor` (`carbon_dioxide`, `volatile_organic_compounds_parts`) | pusty | Wstrzymuje alarm do czasu spadku CO₂ poniżej celu. |
+| `follow_up_entity` | `automation` lub `script` | pusty | Sekwencja uruchamiana po podniesieniu alarmu. |
+| `repeat_reminder_minutes` | liczba | 10 | Interwał kolejnych przypomnień; `0` wyłącza powtórki. |
+| `use_persistent_notification` | bool | `true` | Tworzy powiadomienie w interfejsie HA przy alarmie i po zamknięciu okna. |
 
-```text
-allowed_minutes = max(
-    min_allowed_minutes,
-    base_allowed_minutes - max(0, diff - temp_diff_threshold) * per_degree_penalty
-)
-```
+### Parametry progów i czasu
+| Parametr | Domyślnie | Opis |
+| --- | --- | --- |
+| `temp_diff_threshold` | 6 °C | Minimalna różnica temperatur, od której zaczyna się kontrola. |
+| `base_allowed_minutes` | 15 min | Czas bazowy na wietrzenie po przekroczeniu progu. |
+| `per_degree_penalty` | 2 min/°C | Skracanie limitu za każdy stopień powyżej progu. |
+| `min_allowed_minutes` | 5 min | Najmniejszy możliwy limit czasu. |
+| `co2_target` | 900 ppm | Docelowy poziom CO₂ uprawniający do zakończenia wietrzenia. |
+| `co2_grace_minutes` | 10 min | Dodatkowy czas na przewietrzenie przy wysokim CO₂. |
 
-gdzie `diff` to bezwzględna różnica między temperaturą w pomieszczeniu i na zewnątrz.
+## 🧠 Jak to działa
+1. Okno musi pozostawać otwarte co najmniej 60 sekund, aby automatyzacja ruszyła.
+2. Jeżeli różnica temperatur (`diff`) nie przekracza `temp_diff_threshold`, strażnik pozostaje w spoczynku.
+3. Gdy próg jest przekroczony, obliczany jest limit wietrzenia:
 
-## Logika działania
-1. Automatyzacja uruchamia się, gdy okno/drzwi pozostają otwarte dłużej niż 60 s.
-2. Jeśli różnica temperatur jest mniejsza niż `temp_diff_threshold`, wietrzenie nie jest nadzorowane.
-3. Po przekroczeniu progu rozpoczyna się odliczanie limitu czasu (z uwzględnieniem ewentualnych `co2_grace_minutes`).
-4. Blueprint oczekuje na jedno z dwóch wydarzeń:
-   - okno zostanie zamknięte;
-   - wskazany czujnik CO₂ spadnie do wartości `co2_target` lub niższej.
-5. Jeżeli limit upłynie i okno nadal jest otwarte, wysyłane jest powiadomienie z informacją o pokoju (na podstawie `area_name`), różnicy temperatur i przekroczeniu czasu.
-6. Podczas otwartego okna mogą być wysyłane cykliczne przypomnienia (`repeat_reminder_minutes`), a po alarmie można uruchomić dodatkową automatyzację/skrypt (`follow_up_entity`).
-7. Przy włączonej opcji `use_persistent_notification` w interfejsie HA pojawiają się dwa powiadomienia: pierwsze przy alarmie i kolejne po zamknięciu okna.
+   ```text
+   allowed_minutes = max(
+       min_allowed_minutes,
+       base_allowed_minutes - max(0, diff - temp_diff_threshold) * per_degree_penalty
+   )
+   ```
 
-## Sposoby wykorzystania
-- Przypomnienie o zamknięciu okna zimą, aby nie dogrzewać pomieszczenia.
-- Kontrola wietrzenia w pokoju dziecięcym lub sypialni, z dodatkowym warunkiem obniżenia CO₂.
-- Integracja z ogrzewaniem: `follow_up_entity` może wstrzymać wznowienie ogrzewania do czasu zamknięcia okna.
+4. Blueprint czeka na zamknięcie okna lub spadek CO₂ (jeżeli podano czujnik) przez `allowed_minutes` oraz (gdy trzeba) dodatkowe `co2_grace_minutes`.
+5. Po przekroczeniu limitu wysyłane jest powiadomienie z informacją o pokoju (`area_name`), różnicy temperatur oraz czasie otwarcia.
+6. Dopóki okno pozostaje otwarte i ustawiono `repeat_reminder_minutes`, kolejne przypomnienia trafiają do wskazanego kanału.
+7. `follow_up_entity` umożliwia uruchomienie dodatkowej automatyzacji lub skryptu, a `use_persistent_notification` dodaje powiadomienia w interfejsie Home Assistant.
 
-## Import blueprintu
-Link do importu w Home Assistant:  
+## 💡 Przykładowe scenariusze
+- Zimowe przypomnienia o zamknięciu okna, aby nie dogrzewać niepotrzebnie pomieszczenia.
+- Kontrola jakości powietrza w pokoju dziecka: alarm dopiero po spadku CO₂ poniżej celu.
+- Integracja z ogrzewaniem lub klimatyzacją poprzez `follow_up_entity`, np. pauza pieca lub odmrożenie harmonogramu.
+
+## 🔗 Import blueprintu
 `https://raw.githubusercontent.com/amuamurawski/homeassistant/main/room_airing_watchdog/airing_watchdog.yaml`
