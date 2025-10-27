@@ -154,6 +154,17 @@ mode: restart
 max_exceeded: silent
 
 variables:
+  lang: "{{ 'pl' if (hass.config.language | default('en') | string | lower).startswith('pl') else 'en' }}"
+  t_room_label: "{{ 'Pokój' if lang == 'pl' else 'Room' }}"
+  t_unknown_room: "{{ 'nieznany' if lang == 'pl' else 'unknown' }}"
+  t_temp_diff_label: "{{ 'Różnica T wew–zew' if lang == 'pl' else 'Indoor-outdoor temp diff' }}"
+  t_window_open_label: "{{ 'Okno otwarte już' if lang == 'pl' else 'Window open for' }}"
+  t_minutes_suffix: "{{ 'min' if lang == 'pl' else 'min' }}"
+  t_co2_high_label: "{{ 'CO₂ nadal wysokie' if lang == 'pl' else 'CO₂ still high' }}"
+  t_notify_title_initial: "{{ 'Wietrzenie trwa zbyt długo' if lang == 'pl' else 'Airing taking too long' }}"
+  t_notify_title_repeat: "{{ 'Wietrzenie nadal trwa' if lang == 'pl' else 'Airing still in progress' }}"
+  t_window_closed_title: "{{ 'Okno zamknięte' if lang == 'pl' else 'Window closed' }}"
+  t_window_closed_message: "{{ 'Ustawienia ogrzewania przywrócone, jeśli były wstrzymane.' if lang == 'pl' else 'Heating settings restored if they were paused.' }}"
   v_window: !input window_contact
   v_room_t: !input room_temperature
   v_out_t: !input outdoor_temperature
@@ -251,15 +262,16 @@ actions:
                     state: "on"
                 then:
                   - variables:
-                      msg: >
-                        Pokój: {{ area_name(v_window) or 'nieznany' }}.
-                        Różnica T wew–zew: {{ diff | round(1) }}°C.
-                        Okno otwarte już {{ allowed_min | int }} min.
-                        {{ v_co2|length>0 and states(v_co2)|float(0) > v_co2_target
-                           | iif('CO₂ nadal wysokie: ' ~ (states(v_co2)|int) ~ ' ppm.', '') }}
+                      msg: >-
+                        {{ t_room_label }}: {{ area_name(v_window) or t_unknown_room }}.
+                        {{ t_temp_diff_label }}: {{ diff | round(1) }}°C.
+                        {{ t_window_open_label }} {{ allowed_min | int }} {{ t_minutes_suffix }}.
+                        {% if v_co2|length>0 and states(v_co2)|float(0) > v_co2_target %}
+                        {{ t_co2_high_label }}: {{ states(v_co2)|int }} ppm.
+                        {%- endif %}
                   - service: "{{ v_notify }}"
                     data:
-                      title: "Wietrzenie trwa zbyt długo"
+                      title: "{{ t_notify_title_initial }}"
                       message: "{{ msg }}"
                   - repeat:
                       while:
@@ -273,7 +285,7 @@ actions:
                             minutes: !input repeat_reminder_minutes
                         - service: "{{ v_notify }}"
                           data:
-                            title: "Wietrzenie nadal trwa"
+                            title: "{{ t_notify_title_repeat }}"
                             message: "{{ msg }}"
 
       - conditions:
@@ -289,5 +301,5 @@ actions:
                   entity_id: "scene.snapshot_airing_{{ v_climate | replace('.', '_') }}"
           - service: persistent_notification.create
             data:
-              title: "Okno zamknięte"
-              message: "Ustawienia ogrzewania przywrócone, jeśli były wstrzymane."
+              title: "{{ t_window_closed_title }}"
+              message: "{{ t_window_closed_message }}"
