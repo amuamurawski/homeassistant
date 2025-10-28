@@ -116,7 +116,7 @@ blueprint:
     include_unknown_transitions:
       name: Uwzględniaj zmianę z nieznanego stanu
       description: "Gdy włączone, przejścia z 'unknown'/'unavailable' również uruchamiają alarm zamknięcia. Wyłącz, aby ignorować takie zmiany."
-      default: true
+      default: false
       selector:
         boolean:
 
