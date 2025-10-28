@@ -113,6 +113,13 @@ blueprint:
       selector:
         boolean:
 
+    include_unknown_transitions:
+      name: Uwzględniaj zmianę z nieznanego stanu
+      description: "Gdy włączone, przejścia z 'unknown'/'unavailable' również uruchamiają alarm zamknięcia. Wyłącz, aby ignorować takie zmiany."
+      default: true
+      selector:
+        boolean:
+
 mode: restart
 max_exceeded: silent
 
@@ -150,6 +157,7 @@ variables:
   v_min: !input min_allowed_minutes
   v_repeat: !input repeat_reminder_minutes
   v_persistent: !input use_persistent_notification
+  v_unknown_as_change: !input include_unknown_transitions
 
 triggers:
   - id: opened
@@ -251,13 +259,18 @@ actions:
         sequence:
           - if:
               - condition: template
-                value_template: "{{ v_persistent }}"
+                value_template: >-
+                  {{ v_unknown_as_change or (trigger.from_state is not none and trigger.from_state.state not in ['unknown', 'unavailable']) }}
             then:
-              - service: persistent_notification.create
-                data:
-                  title: "{{ t_window_closed_title }}"
-                  message: "{{ t_window_closed_message }}"
-          - if:
-              - condition: template
-                value_template: "{{ v_close_follow | length > 0 }}"
-            then: !input close_follow_up_action
+              - if:
+                  - condition: template
+                    value_template: "{{ v_persistent }}"
+                then:
+                  - service: persistent_notification.create
+                    data:
+                      title: "{{ t_window_closed_title }}"
+                      message: "{{ t_window_closed_message }}"
+              - if:
+                  - condition: template
+                    value_template: "{{ v_close_follow | length > 0 }}"
+                then: !input close_follow_up_action

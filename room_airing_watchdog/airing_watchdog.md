@@ -23,6 +23,7 @@
 | --- | --- | --- | --- |
 | `open_follow_up_action` | akcja | brak | Sekwencja akcji wykonywana razem z powiadomieniem o zbyt długim wietrzeniu (np. komunikat TTS, pauza ogrzewania). |
 | `close_follow_up_action` | akcja | brak | Sekwencja akcji wykonywana po wykryciu zamknięcia okna (np. wznowienie ogrzewania, komunikat głosowy). |
+| `include_unknown_transitions` | bool | `true` | Czy traktować przejście z `unknown`/`unavailable` na `off` jako zamknięcie (przydatne po restartach integracji). |
 | `repeat_reminder_minutes` | liczba | 10 | Interwał kolejnych przypomnień; `0` wyłącza powtórki. |
 | `use_persistent_notification` | bool | `true` | Tworzy powiadomienie w interfejsie HA przy alarmie i po zamknięciu okna. |
 
@@ -48,7 +49,7 @@
 4. Blueprint czeka na zamknięcie okna przez `allowed_minutes` (liczone w sekundach).
 5. Po przekroczeniu limitu wysyłane są powiadomienia (do wszystkich zdefiniowanych kanałów) z informacją o pokoju (`area_name`), różnicy temperatur oraz czasie otwarcia.
 6. Dopóki okno pozostaje otwarte i ustawiono `repeat_reminder_minutes`, kolejne przypomnienia trafiają do wskazanego kanału.
-7. `open_follow_up_action` pozwala wykonać dodatkowe akcje razem z alarmem (np. powiadomienie głosowe, sterowanie ogrzewaniem), `close_follow_up_action` zadziała po zamknięciu okna, a `use_persistent_notification` dodaje powiadomienia w interfejsie HA.
+7. `open_follow_up_action` pozwala wykonać dodatkowe akcje razem z alarmem (np. powiadomienie głosowe, sterowanie ogrzewaniem), `close_follow_up_action` zadziała po zamknięciu okna, `include_unknown_transitions` decyduje, czy zmiany z `unknown`/`unavailable` mają wywoływać reakcję, a `use_persistent_notification` dodaje powiadomienia w interfejsie HA.
 
 ## 💡 Przykładowe scenariusze
 - Zimowe przypomnienia o zamknięciu okna, aby nie dogrzewać niepotrzebnie pomieszczenia.
